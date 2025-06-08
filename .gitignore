@@ -1,0 +1,6 @@
+# Archivos de inicialización y estado de terraform
+.terraform/
+*.tfstate
+
+# Caché de pytest
+__pycache__/
