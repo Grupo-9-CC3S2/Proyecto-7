@@ -1,3 +1,4 @@
+# Recursos dummy que crean archivos .txt en el directorio actual.
 resource "null_resource" "service_1" {
     provisioner "local-exec" {
         command = "echo 'Ejemplo de servicio 1' > service_1.txt"
