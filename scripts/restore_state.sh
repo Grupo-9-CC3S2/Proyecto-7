@@ -6,6 +6,11 @@ ruta_carpeta_scripts=$(dirname "$ruta_a_este_script")
 ruta_raiz_proyecto=$(dirname "$ruta_carpeta_scripts")
 ruta_carpeta_backups="$ruta_raiz_proyecto/backups"
 ruta_terraform_state="$ruta_raiz_proyecto/iac/terraform.tfstate"
+# verificar que la carpeta de backups existe
+if [ ! -d "$ruta_carpeta_backups" ]; then
+  echo "la carpeta de backups no existe"
+  exit 1
+fi
 # lista de los archivos_backups que hay en la carpeta backups
 archivos_backups=($(ls "$ruta_carpeta_backups"))
 numero_backups=${#archivos_backups[@]}
@@ -23,19 +28,24 @@ done
 # leer la opcion escogida
 while true; do
   read -p "Escribe la opcion del backup que quieres restaurar: " opcion
-  # verificar el valor ingresado sea valido
-  if [ "$opcion" -ge 1 ]; then
-    if [ "$opcion" -le "$numero_backups" ]; then
-      break
+  # verificar que el valor ingresado sea valido
+  if [[ "$opcion" =~ ^[0-9]+$ ]]; then  # uso de expresion regular para validar que la entrada se un numero entero positivo
+    if [ "$opcion" -ge 1 ]; then
+      if [ "$opcion" -le "$numero_backups" ]; then
+        break
+      else
+        echo "no existe esa opcion"
+      fi
     else
       echo "no existe esa opcion"
     fi
   else
-    echo "no existe esa opcion"
+    echo "no existe esa opcion, ingresar un numero valido"
   fi
 done
 # copiar el backup escogido a iac/terraform.tfstate
 backup_escogido="${archivos_backups[$((opcion-1))]}"
 ruta_backup_escogido="$ruta_carpeta_backups/$backup_escogido"
 cp "$ruta_backup_escogido" "$ruta_terraform_state"
+echo "backup realizado"
 
