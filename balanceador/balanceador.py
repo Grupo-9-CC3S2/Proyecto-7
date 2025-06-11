@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 BALANCEADOR ESQUELETO
 Aquí prepararemos la base para:
