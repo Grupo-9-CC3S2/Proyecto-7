@@ -5,6 +5,10 @@
 - Renzo Quispe Villena (RenzoQuispe)
 - Andre Sanchez Vega (AndreSanchezVega)
 
+## Videos grupales
+
+- [Video de sprint 1](https://unipe-my.sharepoint.com/:v:/g/personal/daren_herrera_r_uni_pe/EYXxNwB6cb9OmSLQNa7B8q4B7q1i92Xruj1x8dw18KKDHg?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=dMGP9e)
+
 ## Descripción general del proyecto
 
 Solución local para manejar el ciclo de vida completo de una infraestructura dummy de Terraform:
