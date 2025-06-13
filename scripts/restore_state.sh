@@ -12,7 +12,7 @@ if [ ! -d "$ruta_carpeta_backups" ]; then
   exit 1
 fi
 # lista de los archivos_backups que hay en la carpeta backups
-archivos_backups=($(ls "$ruta_carpeta_backups"))
+read -ra archivos_backups <<< "$(ls "$ruta_carpeta_backups")"
 numero_backups=${#archivos_backups[@]}
 # verificar si hay archivos backup
 if [ "$numero_backups" -eq 0 ]; then

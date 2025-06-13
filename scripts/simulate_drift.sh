@@ -10,11 +10,10 @@ sed -i 's/resource "null_resource" "service_1"/resource "null_resource" "service
 # ejecutamos terraform plan y guardamos en log
 mkdir -p ../logs
 
-cd ../iac
+cd ../iac || exit 1 # En el caso de que el cd falle.
 
 #corremos plan, luego mostrar y guardar la salida en ../logs
 terraform init -input=false        # ← inicializa sin pedir interacción
 terraform plan | tee ../logs/drift_"$timestamp".log
 
-cd ..
 echo "Drift simulado: log en logs/drift_$timestamp.log"
