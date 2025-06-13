@@ -8,8 +8,8 @@ Aquí prepararemos la base para:
 
 import time
 
+
 def main():
-    
     # Aquí irán las llamadas a las funciones de distribute() y health_check()
     pass
 
