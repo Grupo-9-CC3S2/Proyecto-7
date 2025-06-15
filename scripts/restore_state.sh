@@ -16,9 +16,14 @@ archivos_backups=()
 for archivo in "$ruta_carpeta_backups"/*.backup; do
   # verificar la integraidad del JSON
   if jq empty "$archivo" >/dev/null 2>&1; then
-    # verificar version
+    # verificar si tiene la clave version
     if jq -e 'has("version")' "$archivo" >/dev/null 2>&1; then
-      archivos_backups+=("$(basename "$archivo")")
+      # verificar si version es 4
+      if [ "$(jq -r '.version' "$archivo")" -eq 4 ] >/dev/null 2>&1; then
+        archivos_backups+=("$(basename "$archivo")")
+      else
+        echo "backup $(basename "$archivo") tiene version no valida, debe ser 4"
+      fi
     else
       echo "backup $(basename "$archivo") presenta error version"
     fi
