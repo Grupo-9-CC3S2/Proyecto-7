@@ -12,15 +12,28 @@ if [ ! -d "$ruta_carpeta_backups" ]; then
   exit 1
 fi
 # lista de los archivos_backups que hay en la carpeta backups
-read -ra archivos_backups <<< "$(ls "$ruta_carpeta_backups")"
+archivos_backups=()
+for archivo in "$ruta_carpeta_backups"/*.backup; do
+  # verificar la integraidad del JSON
+  if jq empty "$archivo" >/dev/null 2>&1; then
+    # verificar si tiene la clave version
+    if jq -e 'has("version")' "$archivo" >/dev/null 2>&1; then
+      # verificar si version es 4
+      if [ "$(jq -r '.version' "$archivo")" -eq 4 ] >/dev/null 2>&1; then
+        archivos_backups+=("$(basename "$archivo")")
+      else
+        echo "backup $(basename "$archivo") tiene version no valida, debe ser 4"
+      fi
+    else
+      echo "backup $(basename "$archivo") presenta error version"
+    fi
+  else
+    echo "backup $(basename "$archivo") dañado"
+  fi
+done
 numero_backups=${#archivos_backups[@]}
-# verificar si hay archivos backup
-if [ "$numero_backups" -eq 0 ]; then
-  echo "No se encontraron archivos backups"
-  exit 1
-fi
 # menu de backups para escoger
-echo "Lista de backups"
+echo "Lista de backups validos"
 for i in "${!archivos_backups[@]}"; do
   numero=$((i+1))
   echo "$numero- ${archivos_backups[$i]}"
