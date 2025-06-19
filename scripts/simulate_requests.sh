@@ -1,9 +1,15 @@
-#!/usr/bin/env bash
-# directorio donde caen las peticiones
-dest="../balanceador/incoming_requests"
+#!/bin/bash
+
+#carpeta donde está este script
+BASE="$(cd "$(dirname "$0")" && pwd)"
+
+#ruta destino 
+dest="$BASE/../balanceador/incoming_requests"
+
+# Si no existe, crea la carpeta destino
 mkdir -p "$dest"
 
-# se crea 10 archivos req_<n>.txt con "petición n"
+#creamos 10 archivos req_<n>.txt con "petición n"
 for i in {1..10}; do
     echo "petición $i" > "$dest/req_${i}.txt"
 done
