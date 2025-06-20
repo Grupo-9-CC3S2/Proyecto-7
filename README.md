@@ -13,7 +13,12 @@
 ### Sprint 2
 - [Video de sprint 2 - Daren Herrera](https://drive.google.com/file/d/1jPPA7qiJpGir4vT4eNaaCHprOUBv8P7Q/view?usp=sharing)
 - [Video de sprint 2 - Andre Sanchez](https://drive.google.com/file/d/1dsf3CsWrHlfc4x4EFR3oL97l-DVonTc5/view?usp=sharing)
-- [Video de sprint 3 - Renzo Quispe](https://drive.google.com/file/d/17Rh5Ulbk4M2tX8Aw21NVSINUbb9qNJaH/view?usp=sharing)
+- [Video de sprint 2 - Renzo Quispe](https://drive.google.com/file/d/17Rh5Ulbk4M2tX8Aw21NVSINUbb9qNJaH/view?usp=sharing)
+
+### Sprint 3
+- [Video de sprint 3 - Daren Herrera](https://drive.google.com/file/d/1AGy1jX1GKZ3inboNBuWKUTCsziNMFrt-/view?usp=drive_link)
+- [Video de sprint 3 - Andre Sanchez](https://drive.google.com/file/d/1o3VQVK3MyQE-CrOIfd-X3HM050sVBiVC/view)
+- [Video de sprint 3 - Renzo Quispe](https://drive.google.com/file/d/1UYIr5GtclGQe9zUyR4IUwAHf4EySOVfX/view?usp=drive_link)
 
 ## Descripción general del proyecto
 
@@ -41,14 +46,17 @@ Solución local para manejar el ciclo de vida completo de una infraestructura du
 - Ejecuta `terraform init` y `terraform plan` para ver el drift.
 - Se almacena el drift del estado en un archivo de log en `logs/`.
 
-Para ejecutar los scripts:
-```bash
-cd scripts
-# Dar permiso de ejecución
-chmod +x nombre_script.sh
-# Ejecutar el script
-./nombre_script.sh
-```
+`cost_saving.sh`
+- Según la hora del sistema (24 h), apaga/enciende service_3/
+- Esta integrado a balanceador.py, en cada iteración de loop_balanceo(), antes de procesar peticiones, ejecuta cost_saving.sh
+
+`balanceador.py`
+- Crea e inicializa servicios.
+- Distribuye el procesamiento de los archivos de `incoming_requests`.
+- Se ejecuta infinitamente en modo daemon con delay de 5 segundos.
+- Realiza un health-check cada 10 segundos para ver que servicios están activos.
+- Si hay un error con el procesamiento del archivo, se traslada a `errors/`.
+- Crea y actualiza logs que permiten visualizar que archivos ha procesado cada servicio. 
 
 ## Estructura del proyecto
 
@@ -58,24 +66,27 @@ chmod +x nombre_script.sh
 ├── scripts/
 │   ├── backup_state.sh    # Script de backup de tfstate con timestamp
 │   ├── restore_state.sh   # Script para restauración interactiva
+│   ├── cost_saving.sh          # Script para "ahorro de energía"
 │   └── simulate_drift.sh   # Script para simular un desplazamiento en el estado
 ├── balanceador/
-│   ├── balanceador.py     # Balanceador (Python)
-│   ├── incoming_requests/ # Carpeta para solicitudes
-│   ├── service_1/         # Instancia dummy 1
-│   ├── service_2/         # Instancia dummy 2
-│   └── service_3/         # Instancia dummy 3
-└── logs/                  # Registros de operaciones
+│   ├── balanceador.py          # Balanceador (Python)
+│   ├── incoming_requests/      # Carpeta para solicitudes
+│   ├── logs/                   # Carpeta de logs
+│   ├── config_services.json    # Configuración de servicios activos
+│   └── settings.json           # Delay de ejecución de balanceador.py
+└── tests/
+    └── test_balanceador.py     # Script de backup de tfstate con timestamp  
 ```
 
 ## Requisitos técnicos
-
+```
 | Herramientas | Versión       |
-|--------------|---------------|
-| Python       | >= 3.10   |
+| Python       | >= 3.10       |
 | Terraform    | 1.12.1        |
-| Bash         | >= 5.1.16 |
-
+| Bash         | >= 5.1.16     |
+|     jq       | >= 1.6        |
+|    rsync     | >= 3.1.0      |
+```
 ## ¿Cómo usar el proyecto?
 
 1. Clonar el repositorio
@@ -84,6 +95,44 @@ chmod +x nombre_script.sh
 git clone https://github.com/Grupo-9-CC3S2/Proyecto-7.git
 ```
 
-2. ...
+2. Usar los scripts
+- `simulate_requests.sh + balanceador.py` 
+    ```bash
+    make daemon_log
+    bash scripts/simulate_requests.sh # tambien con chmod +x y ./
+    nohup python balanceador/balanceador.py > balanceador/logs/daemon.log 2>&1 &
+    # Usar Ctrl + C para finalizar el proceso
+    ```
+
+    Luego de haber iniciado la ejecución del balanceador, podemos insertar archivos en `incoming_requests` y el balanceador los irá leyendo y distribuyendo entre los servicios.
+- `backup_state,sh` y `restore_state,sh`
+    ```markdown
+    # Primero tener iniciado terraform en iac/
+    # Dar permisos de ejecucion a los scripts
+    chmod +x scripts/backup_state.sh
+    chmod +x scripts/restore_state.sh
+    # probar scripts con:   
+    ./scripts/backup_state.sh
+    ./scripts/restore_state.sh
+    ```
+    Con el script backup_state.sh podemos crear multiples backup de terraform.state, y luego con restore_state.sh podemos listarlos y restaurar terraform.tfstate a un estado anterior.
 
 ## Diagrama ASCII del flujo de balanceo y backup/restauración.
+
+Balanceo
+
+```
+[incoming_requests/] 
+      |
+      v
+[balanceador.py] --(health check)--> [service_1/ service_2/ ...]
+      |
+      v
+[Renombra y mueve archivo a service_<id>/]
+      |
+      v
+[logs/load_<n>.json]
+      |
+      v
+[errors/] (si hay error)
+```
