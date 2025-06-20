@@ -46,7 +46,7 @@ for i in "${!archivos_backups[@]}"; do
 done
 # leer la opcion escogida
 while true; do
-  read -p "Escribe la opcion del backup que quieres restaurar: " opcion
+  read -r -p "Escribe la opcion del backup que quieres restaurar: " opcion
   # verificar que el valor ingresado sea valido
   if [[ "$opcion" =~ ^[0-9]+$ ]]; then  # uso de expresion regular para validar que la entrada se un numero entero positivo
     if [ "$opcion" -ge 1 ]; then
@@ -70,7 +70,7 @@ if diff -q "$ruta_backup_escogido" "$ruta_terraform_state" >/dev/null; then
 else
   echo " Diferencias:"
   diff -u "$ruta_terraform_state" "$ruta_backup_escogido"
-  read -p "Escribe si para confirmar la restauracion:" respuesta
+  read -r -p "Escribe si para confirmar la restauracion:" respuesta
   if [ "$respuesta" = "si" ]; then
     cp "$ruta_backup_escogido" "$ruta_terraform_state"
     echo "backup realizado"
