@@ -10,6 +10,7 @@ DIR_REQUESTS = balanceador.DIR_REQUESTS
 DIR_ERRORS = balanceador.DIR_ERRORS
 DIR_LOGS = balanceador.DIR_LOGS
 
+
 @pytest.fixture(scope="module", autouse=True)
 def setup_entorno():
     # Setup. Se remueven las carpetas de requests, errores y logs que pueden haber quedado.
@@ -19,7 +20,7 @@ def setup_entorno():
     for i in range(1, 4):
         shutil.rmtree(os.path.join(DIR_BASE, f"service_{i}"), ignore_errors=True)
 
-    os.makedirs(DIR_REQUESTS, exist_ok=True) # Se crea la carpeta "incoming_requests/"
+    os.makedirs(DIR_REQUESTS, exist_ok=True)  # Se crea la carpeta "incoming_requests/"
 
     # Configuración dummy de servicios (1 y 2 activos)
     config = {
@@ -30,7 +31,7 @@ def setup_entorno():
         json.dump(config, f)
 
     yield
-    
+
     # Teardown
     shutil.rmtree(DIR_REQUESTS, ignore_errors=True)
     shutil.rmtree(DIR_ERRORS, ignore_errors=True)
@@ -56,6 +57,7 @@ def test_inicializar_servicios():
             assert os.path.exists(archivo_activador), f"service_{i}.txt debería existir"
         else:
             assert not os.path.exists(archivo_activador), f"service_{i}.txt no debería existir"
+
 
 def test_procesar_archivo_valido():
     # Se crea un archivo dummy
@@ -92,6 +94,7 @@ def test_procesar_archivo_valido():
                     log_valido = True
                     break
     assert log_valido, "El archivo no fue registrado en ningún log"
+
 
 def test_procesar_sin_servicios_activos():
     # Cambiar config para no tener servicios activos
