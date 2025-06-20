@@ -2,6 +2,7 @@ import time
 import os
 import json
 import threading
+import subprocess
 
 # Ruta en la que se encuentra este script
 DIR_BASE = os.path.dirname(os.path.abspath(__file__))
@@ -9,6 +10,7 @@ DIR_REQUESTS = os.path.join(DIR_BASE, "incoming_requests")
 DIR_ERRORS = os.path.join(DIR_BASE, "errors")
 DIR_LOGS = os.path.join(DIR_BASE, "logs")
 DIR_SETTINGS = os.path.join(DIR_BASE, "settings.json")
+SCRIPT_COST = os.path.join(DIR_BASE, "..", "scripts", "cost_saving.sh")
 
 NUM_SERVICIOS = 0
 SERVICIOS_ACTIVOS = 0
@@ -209,6 +211,10 @@ def loop_balanceo():
     delay = get_delay()          # valor inicial
     while True:
         inicializar_servicios()
+        # ejecución del cost-saving 
+        subprocess.run(["bash", SCRIPT_COST], check=True)
+
+        #inicializar y procesar
         procesar_archivos()
         time.sleep(delay)        # espera el retardo actual
         delay = get_delay(delay)  # relee settings.json por si cambió
