@@ -97,9 +97,12 @@ git clone https://github.com/Grupo-9-CC3S2/Proyecto-7.git
 
 2. Usar los scripts
 - `simulate_requests.sh + balanceador.py` 
+    Dar permisos de ejecucion a los scripts necesarios  
+    chmod +x scripts/cost_saving.sh
+    chmod +x scripts/simulate_requests.sh
     ```bash
     make daemon_log
-    bash scripts/simulate_requests.sh # tambien con chmod +x y ./
+    bash scripts/simulate_requests.sh
     nohup python balanceador/balanceador.py > balanceador/logs/daemon.log 2>&1 &
     # Usar Ctrl + C para finalizar el proceso
     ```
