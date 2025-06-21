@@ -47,8 +47,8 @@ Solución local para manejar el ciclo de vida completo de una infraestructura du
 - Se almacena el drift del estado en un archivo de log en `logs/`.
 
 `cost_saving.sh`
-- Según la hora del sistema (24 h), apaga/enciende service_3/
-- Esta integrado a balanceador.py, en cada iteración de loop_balanceo(), antes de procesar peticiones, ejecuta cost_saving.sh
+
+El script cost_saving.sh implementa una política de “ahorro de costos” para el balanceador.py local: cada vez que se ejecuta comprueba la hora del sistema y, si está entre las 00:00 y las 06:00, mueve la carpeta balanceador/service_3/ a archived/service_3/ (simulando que la instancia está “apagada”) y deja un registro con timestamp en balanceador/logs/cost.log; si está entre las 06:01 y las 23:59, invierte ese movimiento (restaura archived/service_3/ como carpeta activa) y registra también el “encendido”. De este modo, service_3/ solo existe en horario productivo, y todos los cambios quedan anotados para poder auditar fácilmente las ventanas de apagado y encendido.
 
 `balanceador.py`
 - Crea e inicializa servicios.
