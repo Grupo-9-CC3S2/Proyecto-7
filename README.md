@@ -119,20 +119,60 @@ git clone https://github.com/Grupo-9-CC3S2/Proyecto-7.git
 
 ## Diagrama ASCII del flujo de balanceo y backup/restauración.
 
-Balanceo
+### Balanceo
 
+      ```
+      [incoming_requests/] 
+            |
+            v
+      [balanceador.py] --(health check)--> [service_1/ service_2/ ...]
+            |
+            v
+      [Renombra y mueve archivo a service_<id>/]
+            |
+            v
+      [logs/load_<n>.json]
+            |
+            v
+      [errors/] (si hay error)
+      ```
+
+### Diagramas del proceso de backup/restauración
+
+Creación de backup con backup_state.sh
 ```
-[incoming_requests/] 
+[terraform.tfstate] 
       |
       v
-[balanceador.py] --(health check)--> [service_1/ service_2/ ...]
+[backup_state.sh] --->  Se crea copia incremental con rsync
+                        /backups/tfstate_2025-06-20_18-30-00.backup/terraform.tfstate
+
+Estructura del backup:
+/backups/
+└── tfstate_2025-06-20_18-30-00.backup/
+      └── terraform.tfstate  (copia nueva o hardlink a copia anterior)
+```
+Simulación de desastre
+```
+Usuario borra o modifica terraform.state
+
+Estado:
+[terraform.tfstate] -->  no existe o esta dañado
+```
+Restauración con restore_state.sh
+```
+[restore_state.sh] ---> Lista backups disponibles
       |
       v
-[Renombra y mueve archivo a service_<id>/]
+se selecciona un backup a traves de un menu: tfstate_2025-06-20_18-30-00.backup
       |
       v
-[logs/load_<n>.json]
+Verifica validez JSON (jq)
       |
       v
-[errors/] (si hay error)
+Copia archivo de backup al directorio original
+
+Resultado:
+[terraform.tfstate] --> restaurado a un estado anterior
+
 ```
